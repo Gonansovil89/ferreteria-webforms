@@ -229,8 +229,8 @@ Flujo:
 
     BEGIN TRANSACTION
 
+        UPDATE Producto con saldo esperado y producto activo
         INSERT MovimientoStock
-        UPDATE Producto
 
     COMMIT
 
@@ -248,11 +248,11 @@ o:
 
 ---
 
-# Problema de concurrencia conocido
+# Problema de concurrencia de la implementación anterior
 
-La implementación actual todavía tiene una ventana de concurrencia.
+La implementación anterior tenía una ventana de concurrencia.
 
-Actualmente:
+Flujo anterior:
 
     Service
        |
@@ -290,11 +290,62 @@ El resultado correcto, si A retiró 10 y B retiró 20, debería ser:
 Este problema corresponde a una actualización perdida
 (lost update).
 
-La próxima evolución del diseño debe garantizar que el stock utilizado
-para calcular un movimiento siga siendo válido al persistirlo.
+El control implementado verifica que el stock utilizado para calcular
+un movimiento siga siendo válido al persistirlo.
 
-Se analizarán mecanismos de concurrencia y transacciones antes de elegir
-la implementación definitiva.
+El 2026-10-04 se eligió e implementó concurrencia optimista.
+
+---
+
+# Decisión: concurrencia optimista para stock
+
+La solución conserva los cálculos y validaciones de negocio en
+el Service y el SQL en el Repository. Al persistir, el Repository comprueba
+que el saldo utilizado por el Service sigue vigente mediante un UPDATE
+condicional con parámetros:
+
+    UPDATE Producto
+    SET Stock = @StockPosterior
+    WHERE Id = @ProductoId AND Stock = @StockAnterior AND Activo = 1
+
+El UPDATE debe afectar exactamente una fila. Cero filas significa que
+el saldo esperado ya no coincide o que el producto no está disponible; la operación
+no debe confirmarse. El UPDATE y el INSERT del historial deben permanecer
+dentro de la misma transacción, con ROLLBACK ante un conflicto o error.
+
+Flujo implementado:
+
+    Service lee stock y calcula movimiento
+    BEGIN TRANSACTION
+        UPDATE condicional y comprobación de filas afectadas
+        INSERT MovimientoStock
+    COMMIT
+
+Ante un conflicto, se lanza `InvalidOperationException` y la UI muestra
+el mensaje para volver a intentar con datos actualizados. No hay
+reintentos automáticos.
+
+Ejemplo: A y B leen 100. A retira 10 y confirma 90. El UPDATE de B, que
+esperaba 100 para retirar 20, afecta cero filas y su operación se revierte.
+Al volver a intentar desde 90, B puede registrar una salida y dejar 70.
+
+Ventajas: cambio localizado, sin nuevas tecnologías ni cambios iniciales
+de esquema, y sin mantener un bloqueo desde la lectura del Service.
+El UPDATE sí adquiere los bloqueos normales de SQL Server durante la
+transacción; concurrencia optimista no significa ausencia de bloqueos.
+
+Desventajas y límites: el usuario puede necesitar repetir una operación.
+Comparar el saldo detecta diferencias de stock, pero no detecta cambios
+intermedios que devuelvan el saldo al mismo valor ni cambios de otros
+atributos. Si se necesita detectar cualquier modificación de la fila,
+se deberá evaluar un token `rowversion`. El estado activo se comprueba
+en el UPDATE para rechazar productos desactivados después de la lectura.
+
+Se verificaron contra LocalDB movimientos normales, conflicto por saldo
+desactualizado, reintento, rollback por fallo del INSERT, salida excesiva
+y producto inactivo. El conflicto se reprodujo persistiendo en orden dos
+cálculos con la misma lectura inicial; falta ejecución simultánea con
+dos sesiones y verificación en UI.
 
 ---
 

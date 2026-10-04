@@ -29,14 +29,15 @@ namespace WebApplication1.Repositories
 
                 try
                 {
-                    InsertarMovimiento(
-                        movimiento,
+                    ActualizarStockProducto(
+                        movimiento.ProductoId,
+                        movimiento.StockAnterior,
+                        movimiento.StockPosterior,
                         conexion,
                         transaccion);
 
-                    ActualizarStockProducto(
-                        movimiento.ProductoId,
-                        movimiento.StockPosterior,
+                    InsertarMovimiento(
+                        movimiento,
                         conexion,
                         transaccion);
 
@@ -127,6 +128,7 @@ namespace WebApplication1.Repositories
 
         private void ActualizarStockProducto(
             int productoId,
+            int stockAnterior,
             int stockPosterior,
             SqlConnection conexion,
             SqlTransaction transaccion)
@@ -134,7 +136,9 @@ namespace WebApplication1.Repositories
             string sql = @"
                 UPDATE Producto
                 SET Stock = @Stock
-                WHERE Id = @ProductoId";
+                WHERE Id = @ProductoId
+                  AND Stock = @StockAnterior
+                  AND Activo = 1";
 
             SqlCommand comando =
                 new SqlCommand(
@@ -152,13 +156,18 @@ namespace WebApplication1.Repositories
                 SqlDbType.Int
             ).Value = productoId;
 
+            comando.Parameters.Add(
+                "@StockAnterior",
+                SqlDbType.Int
+            ).Value = stockAnterior;
+
             int filasAfectadas =
                 comando.ExecuteNonQuery();
 
             if (filasAfectadas != 1)
             {
-                throw new Exception(
-                    "No se pudo actualizar el stock del producto.");
+                throw new InvalidOperationException(
+                    "No se registró el movimiento: el stock cambió o el producto ya no está disponible. Vuelva a intentar con los datos actualizados.");
             }
         }
     }

@@ -135,6 +135,13 @@ Los cambios posteriores deben realizarse mediante movimientos de stock.
 
 ## Estado del proyecto
 
+El último checkpoint funcional documentado es del 2026-10-03.
+El 2026-10-04 se eligió concurrencia optimista para movimientos de stock,
+implementada en `feature/stock-concurrency` mediante un UPDATE condicionado
+al saldo esperado y al producto activo. Se verificaron compilación y
+pruebas de integración de conflicto y rollback contra LocalDB.
+Quedan pendientes pruebas de UI y ejecución simultánea con dos sesiones.
+
 Consultar:
 
     docs/DEV-STATE.md

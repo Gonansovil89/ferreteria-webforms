@@ -1,13 +1,22 @@
 # Development State
 
-Última actualización: 2026-10-03
+Última actualización: 2026-10-04
 
 ## Estado
 
-CHECKPOINT FUNCIONAL
+CONCURRENCIA OPTIMISTA IMPLEMENTADA; VALIDACIÓN DE UI PENDIENTE
 
-El proyecto compila con 0 errores y el flujo básico de movimientos
-de stock fue probado contra SQL Server.
+El checkpoint del 2026-10-03 documenta compilación con 0 errores y una
+prueba del flujo básico de movimientos contra SQL Server. En la revisión
+del 2026-10-04 se inspeccionaron el código, la documentación y Git;
+los intentos de compilación y consulta de infraestructura no devolvieron
+un resultado confirmado. No se repitieron pruebas de UI ni de persistencia.
+
+En la continuación del 2026-10-04 se implementó concurrencia optimista.
+Rebuild Debug completado sin errores con MSBuild de Visual Studio 2019
+disponible en este equipo; una advertencia CS0168 previa en Productos.aspx.cs.
+LocalDB respondió y las pruebas de integración pasaron. No se probó la UI
+ni la ejecución simultánea con dos sesiones.
 
 ---
 
@@ -46,11 +55,17 @@ Ramas principales:
     master
     develop
 
-Rama actual al crear este checkpoint:
+Rama actual:
 
-    develop
+    feature/stock-concurrency
 
-Todavía pendiente subir el repositorio remoto a GitHub.
+El checkpoint funcional previo se creó en `develop`.
+El remoto `origin` está configurado como:
+
+    https://github.com/Gonansovil89/ferreteria-webforms.git
+
+No se verificó en esta revisión si los commits están publicados en GitHub.
+El árbol de trabajo estaba limpio antes de esta actualización documental.
 
 ---
 
@@ -173,8 +188,8 @@ Utiliza una `SqlTransaction`.
 
 Dentro de la transacción se ejecutan:
 
+    UPDATE Producto.Stock condicionado a StockAnterior y Activo = 1
     INSERT MovimientoStock
-    UPDATE Producto.Stock
 
 Ante éxito:
 
@@ -230,9 +245,10 @@ Resultado:
 
 ---
 
-# Riesgo técnico conocido
+# Control de concurrencia implementado
 
-Existe una ventana de concurrencia.
+La lectura del Service sigue fuera de la transacción, pero el Repository
+ahora rechaza saldos desactualizados antes de insertar el historial.
 
 Actualmente `MovimientoStockService` obtiene el producto y su stock
 antes de que `MovimientoStockRepository` inicie la transacción.
@@ -246,18 +262,37 @@ Flujo actual:
              |
              v
     BEGIN TRANSACTION
+    UPDATE Producto.Stock WHERE Stock = @StockAnterior AND Activo = 1
+    comprobar que afectó una fila
     INSERT MovimientoStock
-    UPDATE Producto.Stock
     COMMIT
 
-Dos operaciones concurrentes podrían leer el mismo stock inicial y
-producir una actualización perdida.
+Dos operaciones pueden leer el mismo saldo; si la primera lo cambia,
+la segunda se rechaza y hace rollback. También se rechaza un producto
+que dejó de estar activo. Se conserva el límite de comparar saldos:
+no se detectan cambios intermedios que regresan al mismo valor.
+
+Pruebas de integración del 2026-10-04 (`tests/StockConcurrencySmoke.cs`):
+
+- salida 100 → 90 registrada;
+- segunda salida basada en 100 rechazada; saldo 90 e historial de una fila;
+- reintento desde 90 → 70 registrado;
+- motivo inexistente provoca fallo del INSERT y rollback del saldo;
+- salida de 71 desde 70 rechazada por el Service;
+- producto inactivo rechazado al persistir.
+
+El producto temporal y sus movimientos se eliminaron al finalizar.
+La prueba reproduce una lectura desactualizada con persistencias secuenciales;
+no sustituye la prueba simultánea. La primera versión del arnés usó una
+transacción externa que interfería con el rollback; se corrigió antes
+de obtener los resultados anteriores.
 
 ---
 
 # Próximo objetivo
 
-Estudiar y resolver concurrencia en movimientos de stock.
+Verificar el flujo en UI y ejecutar dos sesiones simultáneas para completar
+la validación de concurrencia optimista antes de cerrar la feature.
 
 Conceptos a trabajar:
 
@@ -266,7 +301,7 @@ Conceptos a trabajar:
 - lost update
 - locking
 - consistencia
-- alternativas de concurrencia optimista/pesimista
+- actualización condicional y detección de conflictos
 
 La solución debe preservar:
 
@@ -276,7 +311,29 @@ La solución debe preservar:
 - atomicidad
 - stock no negativo
 
-No implementar la solución sin analizar primero las alternativas.
+El enfoque implementado es actualizar el producto solamente si su stock
+todavía coincide con `StockAnterior`, verificando las filas afectadas.
+Si otro movimiento cambió el saldo, se debe rechazar la operación y hacer
+ROLLBACK de toda la transacción, sin dejar un movimiento registrado.
+El usuario debe recibir un mensaje que permita volver a intentar con
+el saldo actualizado; no se prevén reintentos automáticos inicialmente.
+
+Antes de modificar código, repasar el flujo y el resultado esperado.
+Después, verificar movimientos normales, saldo insuficiente, conflicto
+entre dos operaciones que leyeron el mismo stock y rollback sin efectos
+parciales. La compilación, UI y persistencia deben volver a comprobarse.
+
+La decisión y sus límites se describen en `docs/ARCHITECTURE.md`.
+
+---
+
+# Limitaciones adicionales observadas
+
+- El Service no valida que el motivo exista y esté activo.
+- No hay scripts SQL versionados para recrear la base y verificar sus
+  restricciones a partir del repositorio.
+- Se comprobó el rechazo SQL de un motivo inexistente, pero no se auditó
+  el conjunto completo de restricciones de SQL Server.
 
 ---
 
