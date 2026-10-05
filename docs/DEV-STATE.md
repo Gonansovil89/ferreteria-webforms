@@ -1,13 +1,61 @@
 # Development State
 
-Última actualización: 2026-10-03
+Última actualización: 2026-10-04
 
 ## Estado
 
-CHECKPOINT FUNCIONAL
+CONCURRENCIA OPTIMISTA IMPLEMENTADA Y VALIDADA
 
-El proyecto compila con 0 errores y el flujo básico de movimientos
-de stock fue probado contra SQL Server.
+# Validación final de concurrencia
+
+El 2026-10-04 se completaron las validaciones pendientes.
+
+## Prueba simultánea con dos sesiones SQL
+
+Producto de prueba:
+
+    ProductoId = 6002
+    Codigo = TEST-CONC-REAL
+    Stock inicial = 100
+
+Sesión A intentó actualizar de 100 a 90 y afectó 1 fila.
+
+Sesión B intentó actualizar de 100 a 80 mientras A mantenía la
+transacción abierta. Luego del COMMIT de A, B continuó y afectó 0 filas
+porque el stock ya era 90.
+
+Resultado final:
+
+    Stock = 90
+
+La actualización perdida fue evitada correctamente.
+
+## Prueba desde UI
+
+Desde `MovimientosStock.aspx` se registró:
+
+    ProductoId = 6002
+    TipoMovimientoStockId = 2
+    MotivoMovimientoStockId = 4
+    Cantidad = 10
+    Observacion = "prueba UI concurrencia"
+
+Resultado:
+
+    StockAnterior = 90
+    StockPosterior = 80
+    MovimientoStock.Id = 2002
+
+Se verificó en SQL el saldo final del producto en 80 y el historial generado.
+
+Resultado:
+
+    VALIDACIÓN OK
+
+# Próximo objetivo
+
+La validación funcional y de concurrencia de esta feature está completa.
+El siguiente paso es cerrar el Pull Request e integrar la feature en `develop`.
 
 ---
 
@@ -46,11 +94,17 @@ Ramas principales:
     master
     develop
 
-Rama actual al crear este checkpoint:
+Rama actual:
 
-    develop
+    feature/stock-concurrency
 
-Todavía pendiente subir el repositorio remoto a GitHub.
+El checkpoint funcional previo se creó en `develop`.
+El remoto `origin` está configurado como:
+
+    https://github.com/Gonansovil89/ferreteria-webforms.git
+
+No se verificó en esta revisión si los commits están publicados en GitHub.
+El árbol de trabajo estaba limpio antes de esta actualización documental.
 
 ---
 
@@ -173,8 +227,11 @@ Utiliza una `SqlTransaction`.
 
 Dentro de la transacción se ejecutan:
 
+    UPDATE Producto.Stock condicionado a StockAnterior y Activo = 1
+    comprobar que ExecuteNonQuery() afectó exactamente una fila
     INSERT MovimientoStock
-    UPDATE Producto.Stock
+
+Si no se afecta exactamente una fila, se lanza `InvalidOperationException`.
 
 Ante éxito:
 
@@ -186,7 +243,7 @@ Ante error:
 
 ---
 
-# Última prueba funcional confirmada
+# Prueba funcional del checkpoint previo
 
 Fecha:
 
@@ -230,9 +287,10 @@ Resultado:
 
 ---
 
-# Riesgo técnico conocido
+# Control de concurrencia implementado
 
-Existe una ventana de concurrencia.
+La lectura del Service sigue fuera de la transacción, pero el Repository
+ahora rechaza saldos desactualizados antes de insertar el historial.
 
 Actualmente `MovimientoStockService` obtiene el producto y su stock
 antes de que `MovimientoStockRepository` inicie la transacción.
@@ -246,29 +304,37 @@ Flujo actual:
              |
              v
     BEGIN TRANSACTION
+    UPDATE Producto.Stock WHERE Stock = @StockAnterior AND Activo = 1
+    comprobar que afectó una fila
     INSERT MovimientoStock
-    UPDATE Producto.Stock
     COMMIT
 
-Dos operaciones concurrentes podrían leer el mismo stock inicial y
-producir una actualización perdida.
+Dos operaciones pueden leer el mismo saldo; si la primera lo cambia,
+la segunda se rechaza y hace rollback. También se rechaza un producto
+que dejó de estar activo. Se conserva el límite de comparar saldos:
+no se detectan cambios intermedios que regresan al mismo valor.
+
+Pruebas de integración del 2026-10-04 (`tests/StockConcurrencySmoke.cs`):
+
+- salida 100 → 90 registrada;
+- segunda salida basada en 100 rechazada; saldo 90 e historial de una fila;
+- reintento desde 90 → 70 registrado;
+- motivo inexistente provoca fallo del INSERT y rollback del saldo;
+- salida de 71 desde 70 rechazada por el Service;
+- producto inactivo rechazado al persistir.
+
+El producto temporal y sus movimientos se eliminaron al finalizar.
+El smoke test reproduce una lectura desactualizada con persistencias
+secuenciales; se complementó con la prueba simultánea documentada arriba.
+La primera versión del arnés usó una
+transacción externa que interfería con el rollback; se corrigió antes
+de obtener los resultados anteriores.
 
 ---
 
-# Próximo objetivo
+# Alcance de la feature validada
 
-Estudiar y resolver concurrencia en movimientos de stock.
-
-Conceptos a trabajar:
-
-- transacciones
-- concurrencia
-- lost update
-- locking
-- consistencia
-- alternativas de concurrencia optimista/pesimista
-
-La solución debe preservar:
+La solución preserva:
 
 - reglas de negocio en una ubicación coherente
 - acceso a datos encapsulado
@@ -276,13 +342,36 @@ La solución debe preservar:
 - atomicidad
 - stock no negativo
 
-No implementar la solución sin analizar primero las alternativas.
+El enfoque implementado es actualizar el producto solamente si su stock
+todavía coincide con `StockAnterior`, verificando las filas afectadas.
+Si otro movimiento cambió el saldo, se debe rechazar la operación y hacer
+ROLLBACK de toda la transacción, sin dejar un movimiento registrado.
+El usuario debe recibir un mensaje que permita volver a intentar con
+el saldo actualizado; no hay reintentos automáticos.
+
+El Service mantiene los cálculos y las reglas de negocio. No se cambió
+el esquema SQL ni se agregaron nuevas tecnologías. Se completaron los
+smoke tests, la prueba real con dos sesiones SQL y la prueba desde UI.
+
+La estrategia compara el saldo: no detecta cambios intermedios que vuelvan
+al mismo valor. `rowversion` podría evaluarse más adelante. La decisión
+y sus límites se describen en `docs/ARCHITECTURE.md`.
+
+---
+
+# Limitaciones adicionales observadas
+
+- El Service no valida que el motivo exista y esté activo.
+- No hay scripts SQL versionados para recrear la base y verificar sus
+  restricciones a partir del repositorio.
+- Se comprobó el rechazo SQL de un motivo inexistente, pero no se auditó
+  el conjunto completo de restricciones de SQL Server.
 
 ---
 
 # Pendientes posteriores
 
-Una vez resuelta la concurrencia, evaluar incrementalmente:
+Fuera del alcance de esta feature, evaluar incrementalmente:
 
 - Post/Redirect/Get en MovimientosStock para evitar duplicados por F5
 - historial visual de movimientos
