@@ -21,6 +21,11 @@ namespace WebApplication1
                 CargarTiposMovimiento();
                 CargarMotivos();
                 CargarProductos();
+                if (Request.QueryString["resultado"] == "ok")
+                {
+                    lblMensaje.Text =
+                        "Movimiento registrado correctamente.";
+                }
             }
         }
         protected void btnRegistrar_Click(object sender, EventArgs e)
@@ -85,8 +90,7 @@ namespace WebApplication1
                     cantidad,
                     observacion);
 
-                lblMensaje.Text =
-                    "Movimiento registrado correctamente.";
+                Response.Redirect("~/MovimientosStock?resultado=ok");
             }
             catch (Exception ex)
             {
