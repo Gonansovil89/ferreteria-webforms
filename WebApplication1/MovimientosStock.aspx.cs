@@ -14,6 +14,8 @@ namespace WebApplication1
         private TipoMovimientoStockRepository tipoMovimientoRepository = new TipoMovimientoStockRepository();
 
         private MotivoMovimientoStockRepository motivoMovimientoRepository = new MotivoMovimientoStockRepository();
+
+        private MovimientoStockRepository movimientoStockRepository = new MovimientoStockRepository();
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -26,7 +28,15 @@ namespace WebApplication1
                     lblMensaje.Text =
                         "Movimiento registrado correctamente.";
                 }
+                CargarHistorial();
             }
+        }
+        private void CargarHistorial()
+        {
+            gvHistorial.DataSource =
+                movimientoStockRepository.ObtenerHistorial();
+
+            gvHistorial.DataBind();
         }
         protected void btnRegistrar_Click(object sender, EventArgs e)
         {

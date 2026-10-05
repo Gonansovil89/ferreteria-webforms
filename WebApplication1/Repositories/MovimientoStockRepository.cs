@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using WebApplication1.Models;
+using System.Collections.Generic;
 
 namespace WebApplication1.Repositories
 {
@@ -13,6 +14,68 @@ namespace WebApplication1.Repositories
             return ConfigurationManager
                 .ConnectionStrings["FerreteriaConnection"]
                 .ConnectionString;
+        }
+        public List<MovimientoStockHistorial> ObtenerHistorial()
+        {
+            List<MovimientoStockHistorial> movimientos = new List<MovimientoStockHistorial>();
+
+            string connectionString = ObtenerConnectionString();
+
+            using (SqlConnection conexion = new SqlConnection(connectionString))
+            {
+                SqlCommand comando =
+                    new SqlCommand(
+                        "MovimientoStock_ObtenerHistorial",
+                        conexion);
+
+                comando.CommandType = CommandType.StoredProcedure;
+
+                conexion.Open();
+
+                using (SqlDataReader reader =
+                    comando.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        MovimientoStockHistorial movimiento =
+                            new MovimientoStockHistorial();
+
+                        movimiento.Id =
+                            (int)reader["Id"];
+
+                        movimiento.Fecha =
+                            (DateTime)reader["Fecha"];
+
+                        movimiento.ProductoCodigo =
+                            reader["ProductoCodigo"].ToString();
+
+                        movimiento.ProductoNombre =
+                            reader["ProductoNombre"].ToString();
+
+                        movimiento.TipoMovimiento =
+                            reader["TipoMovimiento"].ToString();
+
+                        movimiento.MotivoMovimiento =
+                            reader["MotivoMovimiento"].ToString();
+
+                        movimiento.Cantidad =
+                            (int)reader["Cantidad"];
+
+                        movimiento.StockAnterior =
+                            (int)reader["StockAnterior"];
+
+                        movimiento.StockPosterior =
+                            (int)reader["StockPosterior"];
+
+                        movimiento.Observacion =
+                            reader["Observacion"].ToString();
+
+                        movimientos.Add(movimiento);
+                    }
+                }
+            }
+
+            return movimientos;
         }
 
         public void RegistrarMovimiento(MovimientoStock movimiento)

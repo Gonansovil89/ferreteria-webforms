@@ -7,8 +7,8 @@
 
     <div>
 
-        <h2>Movimiento de stock</h2>
-
+        <h3>Movimiento de stock</h3>
+        <hr />
         <asp:Label
             runat="server"
             Text="Producto" />
@@ -18,7 +18,8 @@
             runat="server">
         </asp:DropDownList>
 
-        <br /><br />
+        <br />
+        <br />
 
         <asp:Label
             runat="server"
@@ -29,7 +30,8 @@
             runat="server">
         </asp:DropDownList>
 
-        <br /><br />
+        <br />
+        <br />
 
         <asp:Label
             runat="server"
@@ -40,7 +42,8 @@
             runat="server">
         </asp:DropDownList>
 
-        <br /><br />
+        <br />
+        <br />
 
         <asp:Label
             runat="server"
@@ -51,7 +54,8 @@
             runat="server">
         </asp:TextBox>
 
-        <br /><br />
+        <br />
+        <br />
 
         <asp:Label
             runat="server"
@@ -62,21 +66,72 @@
             runat="server">
         </asp:TextBox>
 
-        <br /><br />
+        <br />
+        <br />
 
         <asp:Button
             ID="btnRegistrar"
             runat="server"
-            Text="Registrar" 
+            Text="Registrar"
             OnClick="btnRegistrar_Click" />
 
-        <br /><br />
+        <br />
+        <br />
 
         <asp:Label
             ID="lblMensaje"
             runat="server">
         </asp:Label>
+        <hr />
 
+        <h3>Historial de movimientos</h3>
+
+        <asp:GridView
+            ID="gvHistorial"
+            runat="server"
+            AutoGenerateColumns="False"
+            CssClass="table">
+
+            <Columns>
+                <asp:BoundField
+                    DataField="Fecha"
+                    HeaderText="Fecha"
+                    DataFormatString="{0:dd/MM/yyyy HH:mm}" />
+
+                <asp:BoundField
+                    DataField="ProductoCodigo"
+                    HeaderText="Código" />
+
+                <asp:BoundField
+                    DataField="ProductoNombre"
+                    HeaderText="Producto" />
+
+                <asp:BoundField
+                    DataField="TipoMovimiento"
+                    HeaderText="Tipo" />
+
+                <asp:BoundField
+                    DataField="MotivoMovimiento"
+                    HeaderText="Motivo" />
+
+                <asp:BoundField
+                    DataField="Cantidad"
+                    HeaderText="Cantidad" />
+
+                <asp:BoundField
+                    DataField="StockAnterior"
+                    HeaderText="Stock anterior" />
+
+                <asp:BoundField
+                    DataField="StockPosterior"
+                    HeaderText="Stock posterior" />
+
+                <asp:BoundField
+                    DataField="Observacion"
+                    HeaderText="Observación" />
+            </Columns>
+
+        </asp:GridView>
     </div>
 
 </asp:Content>

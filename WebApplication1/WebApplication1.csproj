@@ -213,6 +213,7 @@
     </Compile>
     <Compile Include="Models\MotivoMovimientoStock.cs" />
     <Compile Include="Models\MovimientoStock.cs" />
+    <Compile Include="Models\MovimientoStockHistorial.cs" />
     <Compile Include="Models\Producto.cs" />
     <Compile Include="Models\TipoMovimientoStock.cs" />
     <Compile Include="MovimientosStock.aspx.cs">
