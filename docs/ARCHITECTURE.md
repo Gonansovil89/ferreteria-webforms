@@ -343,9 +343,12 @@ en el UPDATE para rechazar productos desactivados después de la lectura.
 
 Se verificaron contra LocalDB movimientos normales, conflicto por saldo
 desactualizado, reintento, rollback por fallo del INSERT, salida excesiva
-y producto inactivo. El conflicto se reprodujo persistiendo en orden dos
-cálculos con la misma lectura inicial; falta ejecución simultánea con
-dos sesiones y verificación en UI.
+y producto inactivo. Además, se completó una prueba real con dos sesiones
+SQL: A actualizó 100 → 90 y B, que esperaba 100, afectó cero filas después
+del COMMIT de A. El saldo final fue 90 y se evitó la actualización perdida.
+Desde UI se registró después una salida 90 → 80 y se verificaron el saldo
+y el historial en SQL. La feature quedó validada funcionalmente; los
+detalles de estas pruebas se registran en `docs/DEV-STATE.md`.
 
 ---
 

@@ -46,7 +46,7 @@ Resultado:
     StockPosterior = 80
     MovimientoStock.Id = 2002
 
-Se verificó el saldo final del producto y el historial generado.
+Se verificó en SQL el saldo final del producto en 80 y el historial generado.
 
 Resultado:
 
@@ -228,7 +228,10 @@ Utiliza una `SqlTransaction`.
 Dentro de la transacción se ejecutan:
 
     UPDATE Producto.Stock condicionado a StockAnterior y Activo = 1
+    comprobar que ExecuteNonQuery() afectó exactamente una fila
     INSERT MovimientoStock
+
+Si no se afecta exactamente una fila, se lanza `InvalidOperationException`.
 
 Ante éxito:
 
@@ -240,7 +243,7 @@ Ante error:
 
 ---
 
-# Última prueba funcional confirmada
+# Prueba funcional del checkpoint previo
 
 Fecha:
 
@@ -321,28 +324,17 @@ Pruebas de integración del 2026-10-04 (`tests/StockConcurrencySmoke.cs`):
 - producto inactivo rechazado al persistir.
 
 El producto temporal y sus movimientos se eliminaron al finalizar.
-La prueba reproduce una lectura desactualizada con persistencias secuenciales;
-no sustituye la prueba simultánea. La primera versión del arnés usó una
+El smoke test reproduce una lectura desactualizada con persistencias
+secuenciales; se complementó con la prueba simultánea documentada arriba.
+La primera versión del arnés usó una
 transacción externa que interfería con el rollback; se corrigió antes
 de obtener los resultados anteriores.
 
 ---
 
-# Próximo objetivo
+# Alcance de la feature validada
 
-Verificar el flujo en UI y ejecutar dos sesiones simultáneas para completar
-la validación de concurrencia optimista antes de cerrar la feature.
-
-Conceptos a trabajar:
-
-- transacciones
-- concurrencia
-- lost update
-- locking
-- consistencia
-- actualización condicional y detección de conflictos
-
-La solución debe preservar:
+La solución preserva:
 
 - reglas de negocio en una ubicación coherente
 - acceso a datos encapsulado
@@ -355,14 +347,15 @@ todavía coincide con `StockAnterior`, verificando las filas afectadas.
 Si otro movimiento cambió el saldo, se debe rechazar la operación y hacer
 ROLLBACK de toda la transacción, sin dejar un movimiento registrado.
 El usuario debe recibir un mensaje que permita volver a intentar con
-el saldo actualizado; no se prevén reintentos automáticos inicialmente.
+el saldo actualizado; no hay reintentos automáticos.
 
-Antes de modificar código, repasar el flujo y el resultado esperado.
-Después, verificar movimientos normales, saldo insuficiente, conflicto
-entre dos operaciones que leyeron el mismo stock y rollback sin efectos
-parciales. La compilación, UI y persistencia deben volver a comprobarse.
+El Service mantiene los cálculos y las reglas de negocio. No se cambió
+el esquema SQL ni se agregaron nuevas tecnologías. Se completaron los
+smoke tests, la prueba real con dos sesiones SQL y la prueba desde UI.
 
-La decisión y sus límites se describen en `docs/ARCHITECTURE.md`.
+La estrategia compara el saldo: no detecta cambios intermedios que vuelvan
+al mismo valor. `rowversion` podría evaluarse más adelante. La decisión
+y sus límites se describen en `docs/ARCHITECTURE.md`.
 
 ---
 
@@ -378,7 +371,7 @@ La decisión y sus límites se describen en `docs/ARCHITECTURE.md`.
 
 # Pendientes posteriores
 
-Una vez resuelta la concurrencia, evaluar incrementalmente:
+Fuera del alcance de esta feature, evaluar incrementalmente:
 
 - Post/Redirect/Get en MovimientosStock para evitar duplicados por F5
 - historial visual de movimientos
