@@ -4,19 +4,58 @@
 
 ## Estado
 
-CONCURRENCIA OPTIMISTA IMPLEMENTADA; VALIDACIÓN DE UI PENDIENTE
+CONCURRENCIA OPTIMISTA IMPLEMENTADA Y VALIDADA
 
-El checkpoint del 2026-10-03 documenta compilación con 0 errores y una
-prueba del flujo básico de movimientos contra SQL Server. En la revisión
-del 2026-10-04 se inspeccionaron el código, la documentación y Git;
-los intentos de compilación y consulta de infraestructura no devolvieron
-un resultado confirmado. No se repitieron pruebas de UI ni de persistencia.
+# Validación final de concurrencia
 
-En la continuación del 2026-10-04 se implementó concurrencia optimista.
-Rebuild Debug completado sin errores con MSBuild de Visual Studio 2019
-disponible en este equipo; una advertencia CS0168 previa en Productos.aspx.cs.
-LocalDB respondió y las pruebas de integración pasaron. No se probó la UI
-ni la ejecución simultánea con dos sesiones.
+El 2026-10-04 se completaron las validaciones pendientes.
+
+## Prueba simultánea con dos sesiones SQL
+
+Producto de prueba:
+
+    ProductoId = 6002
+    Codigo = TEST-CONC-REAL
+    Stock inicial = 100
+
+Sesión A intentó actualizar de 100 a 90 y afectó 1 fila.
+
+Sesión B intentó actualizar de 100 a 80 mientras A mantenía la
+transacción abierta. Luego del COMMIT de A, B continuó y afectó 0 filas
+porque el stock ya era 90.
+
+Resultado final:
+
+    Stock = 90
+
+La actualización perdida fue evitada correctamente.
+
+## Prueba desde UI
+
+Desde `MovimientosStock.aspx` se registró:
+
+    ProductoId = 6002
+    TipoMovimientoStockId = 2
+    MotivoMovimientoStockId = 4
+    Cantidad = 10
+    Observacion = "prueba UI concurrencia"
+
+Resultado:
+
+    StockAnterior = 90
+    StockPosterior = 80
+    MovimientoStock.Id = 2002
+
+Se verificó el saldo final del producto y el historial generado.
+
+Resultado:
+
+    VALIDACIÓN OK
+
+# Próximo objetivo
+
+La validación funcional y de concurrencia de esta feature está completa.
+El siguiente paso es cerrar el Pull Request e integrar la feature en `develop`.
 
 ---
 
