@@ -15,6 +15,9 @@ namespace WebApplication1.Services
         private MovimientoStockRepository movimientoStockRepository =
             new MovimientoStockRepository();
 
+        private MotivoMovimientoStockRepository motivoMovimientoRepository =
+            new MotivoMovimientoStockRepository();
+
         public void RegistrarMovimiento(
             int productoId,
             int tipoMovimientoId,
@@ -50,6 +53,20 @@ namespace WebApplication1.Services
             {
                 throw new Exception(
                     "El tipo de movimiento está inactivo.");
+            }
+
+            MotivoMovimientoStock motivo = motivoMovimientoRepository.ObtenerPorId(motivoMovimientoId);
+
+            if (motivo == null)
+            {
+                throw new Exception(
+                    "El motivo de movimiento no existe.");
+            }
+
+            if (!motivo.Activo)
+            {
+                throw new Exception(
+                    "El motivo de movimiento está inactivo.");
             }
 
             if (cantidad <= 0)
