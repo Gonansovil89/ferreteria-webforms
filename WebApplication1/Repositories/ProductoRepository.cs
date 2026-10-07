@@ -108,27 +108,45 @@ namespace WebApplication1.Repositories
         }
         public void InsertarProducto(Producto producto)
         {
-            string connectionString = ObtenerConnectionString();
+            string connectionString =
+                ObtenerConnectionString();
 
-            string sql = @"INSERT INTO Producto
-                   (Codigo, Nombre, Precio, Stock)
-                   VALUES
-                   (@Codigo, @Nombre, @Precio, @Stock)";
-
-            using (SqlConnection conexion = new SqlConnection(connectionString))
+            using (SqlConnection conexion =
+                new SqlConnection(connectionString))
             {
-                SqlCommand comando = new SqlCommand(sql, conexion);
+                SqlCommand comando =
+                    new SqlCommand(
+                        "Producto_Insertar",
+                        conexion);
 
-                comando.Parameters.Add("@Codigo", System.Data.SqlDbType.VarChar, 50)
-                                  .Value = producto.Codigo;
-                comando.Parameters.Add("@Nombre", System.Data.SqlDbType.VarChar, 150)
-                                  .Value = producto.Nombre;
-                SqlParameter parametroPrecio = comando.Parameters.Add("@Precio", System.Data.SqlDbType.Decimal);
+                comando.CommandType =
+                    System.Data.CommandType.StoredProcedure;
+
+                comando.Parameters.Add(
+                    "@Codigo",
+                    System.Data.SqlDbType.VarChar,
+                    50
+                ).Value = producto.Codigo;
+
+                comando.Parameters.Add(
+                    "@Nombre",
+                    System.Data.SqlDbType.VarChar,
+                    150
+                ).Value = producto.Nombre;
+
+                SqlParameter parametroPrecio =
+                    comando.Parameters.Add(
+                        "@Precio",
+                        System.Data.SqlDbType.Decimal);
+
                 parametroPrecio.Precision = 18;
                 parametroPrecio.Scale = 2;
                 parametroPrecio.Value = producto.Precio;
-                comando.Parameters.Add("@Stock", System.Data.SqlDbType.Int)
-                                  .Value = producto.Stock;
+
+                comando.Parameters.Add(
+                    "@Stock",
+                    System.Data.SqlDbType.Int
+                ).Value = producto.Stock;
 
                 conexion.Open();
 
