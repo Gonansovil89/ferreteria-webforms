@@ -13,14 +13,14 @@ namespace WebApplication1
         {
             if (!IsPostBack)
             {
-                lblResultado.Text = "Valor inicial";
+                //lblResultado.Text = "Valor inicial";
             }
         }
         protected void btnModificar_Click(object sender, EventArgs e)
         {
             //string nombre = txtNombre.Text;
             //lblResultado.Text = "Hola " + nombre;
-            lblResultado.Text = "Valor modificado";
+            //lblResultado.Text = "Valor modificado";
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<%@ Page 
+﻿<%@ Page
     Title="Productos"
     Language="C#"
     AutoEventWireup="true"
@@ -12,112 +12,169 @@
     runat="server">
 
     <div>
-        <h2>Ingreso de productos</h2>
-        <br />
+        <div class="page-header">
+            <h1>Productos</h1>
+            <p>
+                Administración del catálogo, precios y stock inicial.
+            </p>
+        </div>
 
-        <asp:Label Text="Nombre" runat="server" />
-        <asp:TextBox ID="txtNombre" runat="server" />
-        <br /><br />
+        <div class="app-card">
+            <h2 class="section-title">Nuevo producto</h2>
 
-        <asp:Label Text="Código" runat="server" />
-        <asp:TextBox ID="txtCodigo" runat="server" />
-        <br /><br />
+            <div class="form-group">
+                <asp:Label
+                    Text="Nombre"
+                    AssociatedControlID="txtNombre"
+                    runat="server" />
 
-        <asp:Label Text="Precio" runat="server" />
-        <asp:TextBox ID="txtPrecio" runat="server" />
-        <br /><br />
+                <asp:TextBox
+                    ID="txtNombre"
+                    runat="server"
+                    CssClass="form-control form-control-app" />
+            </div>
 
-        <asp:Label Text="Stock inicial" runat="server" />
-        <asp:TextBox ID="txtStock" runat="server" />
-        <br /><br />
-        <asp:Label runat="server" ID="lblMensaje" />
+            <div class="form-group">
+                <asp:Label
+                    Text="Código"
+                    AssociatedControlID="txtCodigo"
+                    runat="server" />
 
-        <h3>Productos disponibles</h3>
+                <asp:TextBox
+                    ID="txtCodigo"
+                    runat="server"
+                    CssClass="form-control form-control-app" />
+            </div>
 
-        <br /><br />
-        <asp:GridView
-            ID="gvProductos"
-            runat="server"
-            AutoGenerateColumns="false"
-            DataKeyNames="Id"
-            OnRowEditing="gvProductos_RowEditing"
-            OnRowUpdating="gvProductos_RowUpdating"
-            OnRowCancelingEdit="gvProductos_RowCancelingEdit"
-            OnRowCommand="gvProductos_RowCommand">
-            <Columns>
+            <div class="form-group">
+                <asp:Label
+                    Text="Precio"
+                    AssociatedControlID="txtPrecio"
+                    runat="server" />
 
-                <asp:BoundField
-                    DataField="Id"
-                    HeaderText="Id"
-                    ReadOnly="true" />
+                <asp:TextBox
+                    ID="txtPrecio"
+                    runat="server"
+                    CssClass="form-control form-control-app" />
+            </div>
 
-                <asp:BoundField
-                    DataField="Codigo"
-                    HeaderText="Código"
-                    ReadOnly="true" />
+            <div class="form-group">
+                <asp:Label
+                    Text="Stock inicial"
+                    AssociatedControlID="txtStock"
+                    runat="server" />
 
-                <asp:BoundField
-                    DataField="Nombre"
-                    HeaderText="Nombre" />
+                <asp:TextBox
+                    ID="txtStock"
+                    runat="server"
+                    CssClass="form-control form-control-app" />
+            </div>
 
-                <asp:BoundField
-                    DataField="Precio"
-                    HeaderText="Precio" />
+            <asp:Button
+                ID="btnAgregar"
+                Text="Agregar producto"
+                runat="server"
+                CssClass="btn btn-primary"
+                OnClick="btnAgregar_Click" />
 
-                <asp:BoundField
-                    DataField="Stock"
-                    HeaderText="Stock" />
+            <asp:Label
+                ID="lblMensaje"
+                runat="server"
+                CssClass="message" />
+        </div>
+        <div class="app-card">
+            <h2 class="section-title">Productos disponibles</h2>
 
-                <asp:CommandField
-                    ShowEditButton="true"
-                    EditText="Editar" />
-                <asp:ButtonField
-                    Text="Desactivar"
-                    CommandName="Desactivar" />
-            </Columns>
+            <div class="table-responsive">
+                <asp:GridView
+                    ID="gvProductos"
+                    runat="server"
+                    AutoGenerateColumns="false"
+                    DataKeyNames="Id"
+                    CssClass="table table-striped table-hover"
+                    OnRowEditing="gvProductos_RowEditing"
+                    OnRowUpdating="gvProductos_RowUpdating"
+                    OnRowCancelingEdit="gvProductos_RowCancelingEdit"
+                    OnRowCommand="gvProductos_RowCommand">
 
-        </asp:GridView>
-        <br /><br />
-        <asp:Button ID="btnAgregar" Text="Agregar" runat="server" OnClick="btnAgregar_Click" />
-        <br /><br />
+                    <Columns>
+                        <asp:BoundField
+                            DataField="Id"
+                            HeaderText="Id"
+                            ReadOnly="true" />
 
-        <h3>Listado de productos Inactivos</h3>
+                        <asp:BoundField
+                            DataField="Codigo"
+                            HeaderText="Código"
+                            ReadOnly="true" />
 
-        <br /><br />
-        <asp:GridView
-            ID="gvProductosInactivos"
-            runat="server"
-            AutoGenerateColumns="false"
-            DataKeyNames="Id"
-            OnRowCommand="gvProductosInactivos_RowCommand">
+                        <asp:BoundField
+                            DataField="Nombre"
+                            HeaderText="Nombre" />
 
-            <Columns>
-                <asp:BoundField
-                    DataField="Id"
-                    HeaderText="Id" />
+                        <asp:BoundField
+                            DataField="Precio"
+                            HeaderText="Precio" />
 
-                <asp:BoundField
-                    DataField="Codigo"
-                    HeaderText="Código" />
+                        <asp:BoundField
+                            DataField="Stock"
+                            HeaderText="Stock"
+                            ReadOnly="true" />
 
-                <asp:BoundField
-                    DataField="Nombre"
-                    HeaderText="Nombre" />
+                        <asp:CommandField
+                            ShowEditButton="true"
+                            EditText="Editar" />
 
-                <asp:BoundField
-                    DataField="Precio"
-                    HeaderText="Precio" />
+                        <asp:ButtonField
+                            Text="Desactivar"
+                            CommandName="Desactivar" />
+                    </Columns>
 
-                <asp:BoundField
-                    DataField="Stock"
-                    HeaderText="Stock" 
-                    ReadOnly="true"/>
+                </asp:GridView>
+            </div>
+        </div>
 
-                <asp:ButtonField
-                    Text="Reactivar"
-                    CommandName="Reactivar" />
-            </Columns>
-        </asp:GridView>
+        <div class="app-card">
+            <h2 class="section-title">Productos inactivos</h2>
+
+            <div class="table-responsive">
+                <asp:GridView
+                    ID="gvProductosInactivos"
+                    runat="server"
+                    AutoGenerateColumns="false"
+                    DataKeyNames="Id"
+                    CssClass="table table-striped table-hover"
+                    OnRowCommand="gvProductosInactivos_RowCommand">
+
+                    <Columns>
+                        <asp:BoundField
+                            DataField="Id"
+                            HeaderText="Id" />
+
+                        <asp:BoundField
+                            DataField="Codigo"
+                            HeaderText="Código" />
+
+                        <asp:BoundField
+                            DataField="Nombre"
+                            HeaderText="Nombre" />
+
+                        <asp:BoundField
+                            DataField="Precio"
+                            HeaderText="Precio" />
+
+                        <asp:BoundField
+                            DataField="Stock"
+                            HeaderText="Stock"
+                            ReadOnly="true" />
+
+                        <asp:ButtonField
+                            Text="Reactivar"
+                            CommandName="Reactivar" />
+                    </Columns>
+                </asp:GridView>
+            </div>
+        </div>
     </div>
 
 </asp:Content>
