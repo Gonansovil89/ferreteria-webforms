@@ -1,4 +1,10 @@
-﻿<%@ Page Title="Stock" Language="C#" AutoEventWireup="true" CodeBehind="MovimientosStock.aspx.cs" Inherits="WebApplication1.MovimientosStock" MasterPageFile="~/Site.Master" %>
+﻿<%@ Page
+    Title="Stock"
+    Language="C#"
+    AutoEventWireup="true"
+    CodeBehind="MovimientosStock.aspx.cs"
+    Inherits="WebApplication1.MovimientosStock"
+    MasterPageFile="~/Site.Master" %>
 
 <asp:Content
     ID="BodyContent"
@@ -7,131 +13,148 @@
 
     <div>
 
-        <h3>Movimiento de stock</h3>
-        <hr />
-        <asp:Label
-            runat="server"
-            Text="Producto" />
+        <div class="page-header">
+            <h1>Stock</h1>
+            <p>
+                Registro y consulta de movimientos de stock.
+            </p>
+        </div>
 
-        <asp:DropDownList
-            ID="ddlProducto"
-            runat="server">
-        </asp:DropDownList>
+        <div class="app-card">
+            <h2 class="section-title">Registrar movimiento</h2>
 
-        <br />
-        <br />
+            <div class="form-group">
+                <asp:Label
+                    runat="server"
+                    Text="Producto"
+                    AssociatedControlID="ddlProducto" />
 
-        <asp:Label
-            runat="server"
-            Text="Tipo de movimiento" />
+                <asp:DropDownList
+                    ID="ddlProducto"
+                    runat="server"
+                    CssClass="form-select form-control-app">
+                </asp:DropDownList>
+            </div>
 
-        <asp:DropDownList
-            ID="ddlTipoMovimiento"
-            runat="server">
-        </asp:DropDownList>
+            <div class="form-group">
+                <asp:Label
+                    runat="server"
+                    Text="Tipo de movimiento"
+                    AssociatedControlID="ddlTipoMovimiento" />
 
-        <br />
-        <br />
+                <asp:DropDownList
+                    ID="ddlTipoMovimiento"
+                    runat="server"
+                    CssClass="form-select form-control-app">
+                </asp:DropDownList>
+            </div>
 
-        <asp:Label
-            runat="server"
-            Text="Motivo" />
+            <div class="form-group">
+                <asp:Label
+                    runat="server"
+                    Text="Motivo"
+                    AssociatedControlID="ddlMotivo" />
 
-        <asp:DropDownList
-            ID="ddlMotivo"
-            runat="server">
-        </asp:DropDownList>
+                <asp:DropDownList
+                    ID="ddlMotivo"
+                    runat="server"
+                    CssClass="form-select form-control-app">
+                </asp:DropDownList>
+            </div>
 
-        <br />
-        <br />
+            <div class="form-group">
+                <asp:Label
+                    runat="server"
+                    Text="Cantidad"
+                    AssociatedControlID="txtCantidad" />
 
-        <asp:Label
-            runat="server"
-            Text="Cantidad" />
+                <asp:TextBox
+                    ID="txtCantidad"
+                    runat="server"
+                    CssClass="form-control form-control-app">
+                </asp:TextBox>
+            </div>
 
-        <asp:TextBox
-            ID="txtCantidad"
-            runat="server">
-        </asp:TextBox>
+            <div class="form-group">
+                <asp:Label
+                    runat="server"
+                    Text="Observación"
+                    AssociatedControlID="txtObservacion" />
 
-        <br />
-        <br />
+                <asp:TextBox
+                    ID="txtObservacion"
+                    runat="server"
+                    CssClass="form-control form-control-app">
+                </asp:TextBox>
+            </div>
 
-        <asp:Label
-            runat="server"
-            Text="Observación" />
+            <asp:Button
+                ID="btnRegistrar"
+                runat="server"
+                Text="Registrar movimiento"
+                CssClass="btn btn-primary"
+                OnClick="btnRegistrar_Click" />
 
-        <asp:TextBox
-            ID="txtObservacion"
-            runat="server">
-        </asp:TextBox>
+            <asp:Label
+                ID="lblMensaje"
+                runat="server"
+                CssClass="message">
+            </asp:Label>
+        </div>
 
-        <br />
-        <br />
+        <div class="app-card">
+            <h2 class="section-title">Historial de movimientos</h2>
 
-        <asp:Button
-            ID="btnRegistrar"
-            runat="server"
-            Text="Registrar"
-            OnClick="btnRegistrar_Click" />
+            <div class="table-responsive">
+                <asp:GridView
+                    ID="gvHistorial"
+                    runat="server"
+                    AutoGenerateColumns="False"
+                    CssClass="table table-striped table-hover">
 
-        <br />
-        <br />
+                    <Columns>
+                        <asp:BoundField
+                            DataField="Fecha"
+                            HeaderText="Fecha"
+                            DataFormatString="{0:dd/MM/yyyy HH:mm}" />
 
-        <asp:Label
-            ID="lblMensaje"
-            runat="server">
-        </asp:Label>
-        <hr />
+                        <asp:BoundField
+                            DataField="ProductoCodigo"
+                            HeaderText="Código" />
 
-        <h3>Historial de movimientos</h3>
+                        <asp:BoundField
+                            DataField="ProductoNombre"
+                            HeaderText="Producto" />
 
-        <asp:GridView
-            ID="gvHistorial"
-            runat="server"
-            AutoGenerateColumns="False"
-            CssClass="table">
+                        <asp:BoundField
+                            DataField="TipoMovimiento"
+                            HeaderText="Tipo" />
 
-            <Columns>
-                <asp:BoundField
-                    DataField="Fecha"
-                    HeaderText="Fecha"
-                    DataFormatString="{0:dd/MM/yyyy HH:mm}" />
+                        <asp:BoundField
+                            DataField="MotivoMovimiento"
+                            HeaderText="Motivo" />
 
-                <asp:BoundField
-                    DataField="ProductoCodigo"
-                    HeaderText="Código" />
+                        <asp:BoundField
+                            DataField="Cantidad"
+                            HeaderText="Cantidad" />
 
-                <asp:BoundField
-                    DataField="ProductoNombre"
-                    HeaderText="Producto" />
+                        <asp:BoundField
+                            DataField="StockAnterior"
+                            HeaderText="Stock anterior" />
 
-                <asp:BoundField
-                    DataField="TipoMovimiento"
-                    HeaderText="Tipo" />
+                        <asp:BoundField
+                            DataField="StockPosterior"
+                            HeaderText="Stock posterior" />
 
-                <asp:BoundField
-                    DataField="MotivoMovimiento"
-                    HeaderText="Motivo" />
+                        <asp:BoundField
+                            DataField="Observacion"
+                            HeaderText="Observación" />
+                    </Columns>
 
-                <asp:BoundField
-                    DataField="Cantidad"
-                    HeaderText="Cantidad" />
+                </asp:GridView>
+            </div>
+        </div>
 
-                <asp:BoundField
-                    DataField="StockAnterior"
-                    HeaderText="Stock anterior" />
-
-                <asp:BoundField
-                    DataField="StockPosterior"
-                    HeaderText="Stock posterior" />
-
-                <asp:BoundField
-                    DataField="Observacion"
-                    HeaderText="Observación" />
-            </Columns>
-
-        </asp:GridView>
     </div>
 
 </asp:Content>

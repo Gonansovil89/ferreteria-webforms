@@ -10,9 +10,7 @@ namespace WebApplication1.Repositories
     {
         private string ObtenerConnectionString()
         {
-            return ConfigurationManager
-                .ConnectionStrings["FerreteriaConnection"]
-                .ConnectionString;
+            return ConfigurationManager.ConnectionStrings["FerreteriaConnection"].ConnectionString;
         }
         public List<Producto> ObtenerProductos(bool activo)
         {

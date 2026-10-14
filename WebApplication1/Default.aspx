@@ -1,61 +1,69 @@
-﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="WebApplication1._Default" %>
+﻿<%@ Page
+    Title="Inicio"
+    Language="C#"
+    MasterPageFile="~/Site.Master"
+    AutoEventWireup="true"
+    CodeBehind="Default.aspx.cs"
+    Inherits="WebApplication1._Default" %>
 
-<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <asp:Label
-    ID="lblResultado"
-    runat="server"
-    EnableViewState="true">
-</asp:Label>
+<asp:Content
+    ID="BodyContent"
+    ContentPlaceHolderID="MainContent"
+    runat="server">
 
-<br />
+    <div class="py-4">
 
-<asp:Button
-    ID="btnModificar"
-    runat="server"
-    Text="Modificar Label"
-    OnClick="btnModificar_Click" />
-
-<asp:Button
-    ID="btnPostBack"
-    runat="server"
-    Text="Solo PostBack" />
-    <main>
-        <section class="row" aria-labelledby="aspnetTitle">
-            <h1 id="aspnetTitle">ASP.NET</h1>
-            <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
-            <p><a href="http://www.asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-        </section>
-
-        <div class="row">
-            <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-                <h2 id="gettingStartedTitle">Getting started</h2>
-                <p>
-                    ASP.NET Web Forms lets you build dynamic websites using a familiar drag-and-drop, event-driven model.
-                A design surface and hundreds of controls and components let you rapidly build sophisticated, powerful UI-driven sites with data access.
-                </p>
-                <p>
-                    <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301948">Learn more &raquo;</a>
-                </p>
-            </section>
-            <section class="col-md-4" aria-labelledby="librariesTitle">
-                <h2 id="librariesTitle">Get more libraries</h2>
-                <p>
-                    NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.
-                </p>
-                <p>
-                    <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301949">Learn more &raquo;</a>
-                </p>
-            </section>
-            <section class="col-md-4" aria-labelledby="hostingTitle">
-                <h2 id="hostingTitle">Web Hosting</h2>
-                <p>
-                    You can easily find a web hosting company that offers the right mix of features and price for your applications.
-                </p>
-                <p>
-                    <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301950">Learn more &raquo;</a>
-                </p>
-            </section>
+        <div class="mb-4">
+            <h1>Ferretería Andreu</h1>
+            <p class="text-muted">
+                Sistema de gestión de productos y stock.
+            </p>
         </div>
-    </main>
+
+        <div class="row g-4">
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h4">Productos</h2>
+
+                        <p class="text-muted">
+                            Administrar productos, precios,
+                            stock inicial y estado.
+                        </p>
+
+                        <a
+                            runat="server"
+                            href="~/Productos"
+                            class="btn btn-primary">
+                            Ir a Productos
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h4">Stock</h2>
+
+                        <p class="text-muted">
+                            Registrar movimientos y consultar
+                            el historial de stock.
+                        </p>
+
+                        <a
+                            runat="server"
+                            href="~/MovimientosStock"
+                            class="btn btn-outline-primary">
+                            Ir a Stock
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 
 </asp:Content>
