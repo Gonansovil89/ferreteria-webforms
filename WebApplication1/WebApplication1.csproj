@@ -100,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="About.aspx" />
+    <Content Include="Compras.aspx" />
     <Content Include="Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -194,6 +195,13 @@
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Compras.aspx.cs">
+      <DependentUpon>Compras.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Compras.aspx.designer.cs">
+      <DependentUpon>Compras.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -211,10 +219,14 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Compra.cs" />
+    <Compile Include="Models\CompraDetalle.cs" />
+    <Compile Include="Models\CompraHistorial.cs" />
     <Compile Include="Models\MotivoMovimientoStock.cs" />
     <Compile Include="Models\MovimientoStock.cs" />
     <Compile Include="Models\MovimientoStockHistorial.cs" />
     <Compile Include="Models\Producto.cs" />
+    <Compile Include="Models\Proveedor.cs" />
     <Compile Include="Models\TipoMovimientoStock.cs" />
     <Compile Include="MovimientosStock.aspx.cs">
       <DependentUpon>MovimientosStock.aspx</DependentUpon>
@@ -231,9 +243,11 @@
       <DependentUpon>Productos.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\CompraRepository.cs" />
     <Compile Include="Repositories\MotivoMovimientoStockRepository.cs" />
     <Compile Include="Repositories\MovimientoStockRepository.cs" />
     <Compile Include="Repositories\ProductoRepository.cs" />
+    <Compile Include="Repositories\ProveedorRepository.cs" />
     <Compile Include="Repositories\TipoMovimientoStockRepository.cs" />
     <Compile Include="Services\MovimientoStockService.cs" />
     <Compile Include="Site.Master.cs">
